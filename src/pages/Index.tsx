@@ -7,7 +7,9 @@ import { PatternRecognition } from '@/components/trading/PatternRecognition';
 import { useStockData } from '@/hooks/useStockData';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Activity, BarChart3, TrendingUp, Brain } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { Activity, BarChart3, TrendingUp, Brain, Search } from 'lucide-react';
 
 const Index = () => {
   const [selectedStock, setSelectedStock] = useState('RELIANCE');
@@ -20,7 +22,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background p-4">
       <header className="mb-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-6">
           <div className="flex items-center gap-3">
             <Activity className="h-8 w-8 text-primary" />
             <div>
@@ -28,9 +30,23 @@ const Index = () => {
               <p className="text-muted-foreground">Real-time analysis and pattern recognition</p>
             </div>
           </div>
-          <Badge variant="outline" className="bg-primary/10">
-            Live Market Data
-          </Badge>
+          
+          <div className="flex-1 max-w-md mx-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                placeholder="Search stocks, indices, or symbols..."
+                className="pl-10"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Badge variant="outline" className="bg-primary/10">
+              Live Market Data
+            </Badge>
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 
