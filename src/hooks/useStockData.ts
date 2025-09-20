@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react';
 
+// Finnhub API configuration
+const FINNHUB_API_KEY = 'd37ecf1r01qskrefrccgd37ecf1r01qskrefrcd0';
+const FINNHUB_BASE_URL = 'https://finnhub.io/api/v1';
+
 export interface CandlestickData {
   time: string;
   open: number;
@@ -39,8 +43,45 @@ export interface ChartPattern {
   timeframe: string;
 }
 
-// Mock data generator
-const generateCandlestickData = (days: number = 100): CandlestickData[] => {
+// API Functions
+const fetchStockQuote = async (symbol: string) => {
+  try {
+    const response = await fetch(`${FINNHUB_BASE_URL}/quote?symbol=${symbol}&token=${FINNHUB_API_KEY}`);
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching stock quote:', error);
+    return null;
+  }
+};
+
+const fetchCandlestickData = async (symbol: string, days: number = 30) => {
+  try {
+    const to = Math.floor(Date.now() / 1000);
+    const from = to - (days * 24 * 60 * 60);
+    
+    const response = await fetch(
+      `${FINNHUB_BASE_URL}/stock/candle?symbol=${symbol}&resolution=D&from=${from}&to=${to}&token=${FINNHUB_API_KEY}`
+    );
+    const data = await response.json();
+    
+    if (data.s === 'ok') {
+      return data.c.map((close: number, index: number) => ({
+        time: new Date(data.t[index] * 1000).toISOString().split('T')[0],
+        open: Number(data.o[index].toFixed(2)),
+        high: Number(data.h[index].toFixed(2)),
+        low: Number(data.l[index].toFixed(2)),
+        close: Number(close.toFixed(2)),
+      }));
+    }
+    return [];
+  } catch (error) {
+    console.error('Error fetching candlestick data:', error);
+    return [];
+  }
+};
+
+// Fallback data generator for when API fails
+const generateFallbackData = (days: number = 100): CandlestickData[] => {
   const data: CandlestickData[] = [];
   let price = 1000 + Math.random() * 500;
   
@@ -113,17 +154,31 @@ const mockPatterns: ChartPattern[] = [
   }
 ];
 
-export const useStockData = (symbol: string = 'RELIANCE') => {
+export const useStockData = (symbol: string = 'AAPL') => {
   const [candlestickData, setCandlestickData] = useState<CandlestickData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate API call
     const fetchData = async () => {
       setLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setCandlestickData(generateCandlestickData());
-      setLoading(false);
+      
+      try {
+        // Try to fetch real data from Finnhub API
+        const data = await fetchCandlestickData(symbol);
+        
+        if (data && data.length > 0) {
+          setCandlestickData(data);
+        } else {
+          // Fallback to mock data if API fails
+          setCandlestickData(generateFallbackData());
+        }
+      } catch (error) {
+        console.error('Failed to fetch stock data:', error);
+        // Use fallback data on error
+        setCandlestickData(generateFallbackData());
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchData();
