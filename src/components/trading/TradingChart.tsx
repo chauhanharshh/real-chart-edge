@@ -4,7 +4,7 @@ import {
   ColorType, 
   CrosshairMode, 
   IChartApi,
-  SeriesType,
+  CandlestickSeries,
 } from 'lightweight-charts';
 import { Card } from '@/components/ui/card';
 
@@ -52,7 +52,7 @@ export const TradingChart: React.FC<TradingChartProps> = ({ data, symbol }) => {
     });
 
     // Use the correct method to add a candlestick series
-    const candlestickSeries = chart.addSeries('Candlestick' as any, {
+    const candlestickSeries = chart.addSeries(CandlestickSeries, {
       upColor: '#22c55e',
       downColor: '#ef4444',
       borderDownColor: '#ef4444',
